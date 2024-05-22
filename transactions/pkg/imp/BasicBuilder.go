@@ -1,6 +1,7 @@
 package imp
 
 import (
+	"fmt"
 	"encoding/csv"
 	"math/rand"
 	"os"
@@ -80,7 +81,7 @@ func formatRow(r Row) []string {
 
 	s = append(s, strconv.Itoa(r.Id))
 	s = append(s, strconv.Itoa(r.Date.Day())+"/"+strconv.Itoa(int(r.Date.Month())))
-	s = append(s, strconv.FormatFloat(r.Transaction, 'f', 2, 64))
+	s = append(s, fmt.Sprintf("%+.2f", r.Transaction))
 
 	return s
 }
