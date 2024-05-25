@@ -1,8 +1,8 @@
 package imp
 
 import (
-	"fmt"
 	"encoding/csv"
+	"fmt"
 	"math/rand"
 	"os"
 	"strconv"

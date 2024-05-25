@@ -19,41 +19,40 @@ type Calculator struct {
 }
 
 func (b *Calculator) Query() []imp.Row {
-	tnxs :=  []imp.Row {}
+	tnxs := []imp.Row{}
 
-	
 	return tnxs
 }
 
 func prepareQuery() error {
 	sess := getCredentials()
 	svc := dynamodb.New(sess)
-	
+
 	var queryInput = &dynamodb.QueryInput{
 		TableName: aws.String("Transactions"),
 		//IndexName: aws.String("Date"),
 		KeyConditions: map[string]*dynamodb.Condition{
-		   "Date": {
-			  ComparisonOperator: aws.String("CONTAINS"),
-			  AttributeValueList: []*dynamodb.AttributeValue {
-				 {
-					S: aws.String("-01-"),
-				 },
-			  },
-		   },
-		   "date": {
-			  ComparisonOperator: aws.String("BEGINS_WITH"),
-			  AttributeValueList: []*dynamodb.AttributeValue {
-				 {
-					S: aws.String("2024"),
-				 },
-			  },
-		   },
+			"Date": {
+				ComparisonOperator: aws.String("CONTAINS"),
+				AttributeValueList: []*dynamodb.AttributeValue{
+					{
+						S: aws.String("-01-"),
+					},
+				},
+			},
+			"date": {
+				ComparisonOperator: aws.String("BEGINS_WITH"),
+				AttributeValueList: []*dynamodb.AttributeValue{
+					{
+						S: aws.String("2024"),
+					},
+				},
+			},
 		},
-	 }
+	}
 
 	resp, err := svc.Query(queryInput)
-	
+
 	if err != nil {
 		log.Fatalf("Got error calling Query: %s", err)
 		return err

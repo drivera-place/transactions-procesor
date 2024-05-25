@@ -1,13 +1,13 @@
 package balance
 
-type Summary struct{
-	Total float64
+type Summary struct {
+	Total               float64
 	MonthlyTransactions []MonthlyTransactions
-	AverageDebit float64
-	AverageCredit float64
+	AverageDebit        float64
+	AverageCredit       float64
 }
 
 type MonthlyTransactions struct {
-	Month string
+	Month  string
 	Number int
 }
