@@ -34,7 +34,7 @@ func insertTransaction(r *imp.Row) error {
 
 	ti, err := dynamodbattribute.MarshalMap(r)
 	if err != nil {
-		log.Fatalf("Got error marshalling new movie item: %s", err)
+		log.Fatalf("Got error marshalling new transaction item: %s", err)
 	}
 
 	tableName := "Transactions"
@@ -44,7 +44,7 @@ func insertTransaction(r *imp.Row) error {
 	_, err = svc.PutItem(input)
 
 	if err != nil {
-		log.Fatalf("Got error calling PutItem: %s", err)
+		log.Fatalf("Got error calling Put Item into DynamoDB: %s", err)
 		return err
 	}
 
