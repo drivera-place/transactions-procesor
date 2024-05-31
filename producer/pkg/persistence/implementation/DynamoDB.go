@@ -1,9 +1,8 @@
-package imp2
+package implementation
 
 import (
 	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/client"
@@ -11,52 +10,54 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 
-	"transactions/pkg/imp"
+	"domain/pkg/domain"
 )
 
-type DBProducer struct {
+type DynamoDB struct {
 }
 
-func (b *DBProducer) Push(r *imp.Row) error {
-
-	err := insertTransaction(r)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return err
-}
-
-func insertTransaction(r *imp.Row) error {
-	sess := getCredentials()
-	svc := dynamodb.New(sess)
-
-	ti, err := dynamodbattribute.MarshalMap(r)
-	if err != nil {
-		log.Fatalf("Got error marshalling new transaction item: %s", err)
-	}
+func (db *DynamoDB) Save(txn *domain.Transaction) (string, error) {
 
 	tableName := "Transactions"
 
-	input := &dynamodb.PutItemInput{Item: ti, TableName: aws.String(tableName)}
+	sess := getCredentials()
+	svc := dynamodb.New(sess)
 
-	_, err = svc.PutItem(input)
+	item, err := dynamodbattribute.MarshalMap(txn)
+	if err != nil {
+		log.Fatalf("Got error marshalling new transaction item: %s", err)
+		return "", err
+	}
+
+	fmt.Println("#####")
+	fmt.Println(item)
+
+	input := &dynamodb.PutItemInput{Item: item, TableName: aws.String(tableName)}
+	output, err := svc.PutItem(input)
 
 	if err != nil {
 		log.Fatalf("Got error calling Put Item into DynamoDB: %s", err)
-		return err
+		return "", err
 	}
 
-	fmt.Println("Successfully added '" + strconv.Itoa(r.Id) + " to table " + tableName)
+	id := output.Attributes["Id"].N
 
-	return nil
+	log.Printf("Successfully added %v, to table %v", id, tableName)
+
+	return derefString(id), nil
+}
+
+func derefString(s *string) string {
+	if s != nil {
+		return *s
+	}
+
+	return ""
 }
 
 func getCredentials() client.ConfigProvider {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
-
 	return sess
 }

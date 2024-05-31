@@ -1,9 +1,9 @@
 package interfaces
 
 import (
-	"transactions/pkg/imp"
+	"domain/pkg/domain"
 )
 
 type Producer interface {
-	Push(r *imp.Row) error
+	Publish(txn *domain.Transaction) error
 }

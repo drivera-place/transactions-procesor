@@ -1,28 +1,29 @@
 package main
 
 import (
+	"domain/pkg/domain"
 	"encoding/csv"
 	"fmt"
 	"io"
 	"os"
-	"producer/pkg/imp2"
-	"producer/pkg/interfaces"
+	"producer/pkg/persistence/implementation"
+	"producer/pkg/persistence/interfaces"
 	"strconv"
 	"time"
-	"transactions/pkg/imp"
 )
 
 func main() {
 
 	filePath := "txns.csv"
-	var db interfaces.Producer
-	db = &imp2.DBProducer{}
+	var db interfaces.TxnsDB = &implementation.DynamoDB{}
+	var txn domain.Transaction
 
-	tm, _ := time.Parse("2024-Jan-01", "2024-May-15")
-	err := db.Push(&imp.Row{Id: 5, Date: tm, Transaction: 1500.00})
+	
+	date, _ := time.Parse("2024-Jan-01", "2024-May-15")
+	_, err := db.Save(txn.New(5, date, 1500.00))
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Errorf("Could not save row, v%", err)
 	}
 
 	rows, err := readTnxs(filePath)
@@ -30,19 +31,20 @@ func main() {
 	fmt.Println(rows)
 }
 
-func readTnxs(filePath string) ([]imp.Row, error) {
-	var rows []imp.Row
+func readTnxs(filePath string) ([]*domain.Transaction, error) {
+	var rows []*domain.Transaction
+	var txn domain.Transaction
 
 	if _, err := os.Stat(filePath); err != nil {
-		fmt.Println("File does not exist\n")
+		fmt.Println("File does not exist")
 	}
 
 	file, err := os.Open(filePath)
-	defer file.Close()
-
 	if err != nil {
-		fmt.Println("Error while reading the file.\n")
+		fmt.Println("Error while reading the file.")
 	}
+
+	defer file.Close()
 
 	reader := csv.NewReader(file)
 	reader.Comma = ','
@@ -78,7 +80,7 @@ func readTnxs(filePath string) ([]imp.Row, error) {
 			return nil, err
 		}
 
-		rows = append(rows, imp.Row{Id: id, Date: date, Transaction: tnx})
+		rows = append(rows, txn.New(id, date, tnx))
 	}
 
 	return rows, nil

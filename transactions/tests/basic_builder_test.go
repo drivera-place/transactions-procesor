@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 	"testing"
-	"transactions/pkg/imp"
 	"transactions/pkg/interfaces"
+	"transactions/pkg/transactions"
 )
 
 func TestCreateFile(t *testing.T) {
@@ -15,13 +15,13 @@ func TestCreateFile(t *testing.T) {
 	var builder interfaces.Builder
 	lines := 1000
 	expected := 1001
-	builder = &imp.BasicBuilder{Lines: lines, Path: "txns.csv"}
+	builder = &transactions.FileBuilder{FilePath: "./data/txns.csv"}
 
 	// Act
 	fmt.Println("Creating file...")
-	filePath, err := builder.Create(lines)
+	filePath, err := builder.CreateFile(lines)
 	if err != nil {
-		t.Error(err)
+		t.Errorf("Unexpected error creating file %v", err)
 	}
 
 	// Assert
@@ -31,23 +31,20 @@ func TestCreateFile(t *testing.T) {
 
 func readLines(filePath string, t *testing.T) int {
 
-	if _, err := os.Stat(filePath); err != nil {
-		t.Fatalf("File does not exist\n")
-	}
-
 	file, err := os.Open(filePath)
-	defer file.Close()
 
 	if err != nil {
-		t.Fatalf("Error while reading the file.\n")
+		t.Errorf("Could not open file %v: %v",filePath, err)
 	}
+
+	defer file.Close()
 
 	reader := csv.NewReader(file)
 	reader.Comma = ','
 	lines, err := reader.ReadAll()
 
 	if err != nil {
-		fmt.Println(err)
+		t.Error(err)
 	}
 
 	return len(lines)

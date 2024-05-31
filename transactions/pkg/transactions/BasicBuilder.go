@@ -1,4 +1,4 @@
-package imp
+package transactions
 
 import (
 	"encoding/csv"
@@ -7,18 +7,17 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"domain/pkg/domain"
 )
 
-type BasicBuilder struct {
-	Lines int
-	Name  string
-	Path  string
-	Rows  []Row
+type FileBuilder struct {
+	FilePath string
+	Rows     []*domain.Transaction
 }
 
-func (b *BasicBuilder) Create(lines int) (string, error) {
+func (fb *FileBuilder) CreateFile(lines int) (string, error) {
 
-	w, err := os.Create(b.Path)
+	w, err := os.Create(fb.FilePath)
 
 	if err != nil {
 		panic(err)
@@ -32,9 +31,9 @@ func (b *BasicBuilder) Create(lines int) (string, error) {
 		return "", err
 	}
 
-	b.createTransactions(lines)
+	fb.createTransactions(lines)
 
-	for _, row := range b.Rows {
+	for _, row := range fb.Rows {
 
 		err := n.Write(formatRow(row))
 
@@ -44,19 +43,21 @@ func (b *BasicBuilder) Create(lines int) (string, error) {
 	}
 
 	n.Flush()
-	return b.Path, n.Error()
+	return fb.FilePath, n.Error()
 }
 
-func (b *BasicBuilder) createTransactions(lines int) {
+func (fb *FileBuilder) createTransactions(lines int) {
 
-	b.Rows = make([]Row, lines)
+	var txn domain.Transaction
+	fb.Rows = make([]*domain.Transaction, lines)
 
 	for i := 0; i < lines; i++ {
-		b.Rows[i] = Row{Id: i, Date: randomDate(), Transaction: randomAmmount()}
+		fb.Rows[i] = txn.New(i, randomDate(), randomAmmount())
 	}
 }
 
 func randomDate() time.Time {
+
 	currentYear := time.Now().Year()
 	nextYear := currentYear + 1
 
@@ -76,12 +77,12 @@ func randomAmmount() float64 {
 	return rand.Float64()*(max-min) + min
 }
 
-func formatRow(r Row) []string {
+func formatRow(r *domain.Transaction) []string {
 	s := []string{}
 
-	s = append(s, strconv.Itoa(r.Id))
-	s = append(s, strconv.Itoa(r.Date.Day())+"/"+strconv.Itoa(int(r.Date.Month())))
-	s = append(s, fmt.Sprintf("%+.2f", r.Transaction))
+	s = append(s, strconv.Itoa(r.Id()))
+	s = append(s, strconv.Itoa(r.Date().Day())+"/"+strconv.Itoa(int(r.Date().Month())))
+	s = append(s, fmt.Sprintf("%+.2f", r.Txn()))
 
 	return s
 }

@@ -1,25 +1,22 @@
 package balance
 
 import (
+	"domain/pkg/domain"
 	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-
-	"transactions/pkg/imp"
 )
 
 type Calculator struct {
-	Summary Summary
+	Summary domain.Summary
 }
 
-func (b *Calculator) Query() []imp.Row {
-	tnxs := []imp.Row{}
+func (b *Calculator) Query() []*domain.Transaction {
+	var tnxs []*domain.Transaction
 
 	return tnxs
 }
@@ -60,7 +57,7 @@ func prepareQuery() error {
 
 	log.Println("Query successfully executed")
 
-	for _, row := range resp {
+	for _, row := range resp.Items {
 		fmt.Println(row)
 	}
 

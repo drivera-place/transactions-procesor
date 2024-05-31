@@ -1,4 +1,4 @@
-package balance
+package domain
 
 type Summary struct {
 	Total               float64
